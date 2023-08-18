@@ -1,5 +1,7 @@
 package Model;
 
+import java.math.BigDecimal;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,11 +21,11 @@ public class Student extends Person{
     private List<Transaction> transactions; //Financial transactions related to the student
     private boolean inGoodStanding; //Flag indicating if the student is passing his classes
 
-    public Student(int id, String firstName, String lastName, String email, String studentId,
+    public Student(String studentId, String firstName, String lastName, String email,
                    Date dateOfBirth, String gender, String nationality, String address,
                    String phoneNumber, String major, double gpa, Date enrollmentDate,
                    String status, boolean inGoodStanding) {
-        super(id, firstName, lastName, email);
+        super(firstName, lastName, email);
         this.studentId = studentId;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
@@ -39,8 +41,114 @@ public class Student extends Person{
         this.transactions = new ArrayList<>();
     }
 
-    //Additional helper methods
+    //Register student into system
+    public boolean registerStudent(Connection connection) throws SQLException {
+        String sql = "INSERT INTO Students (studentId, firstName, lastName, email, dateOfBirth, gender, nationality, address, phoneNumber, major, gpa, enrollmentDate, status, inGoodStanding) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, getStudentId());
+            pstmt.setString(2, getFirstName());
+            pstmt.setString(3, getLastName());
+            pstmt.setString(4, getEmail());
+            pstmt.setDate(5, new java.sql.Date(getDateOfBirth().getTime()));
+            pstmt.setString(6, getGender());
+            pstmt.setString(7, getNationality());
+            pstmt.setString(8, getAddress());
+            pstmt.setString(9, getPhoneNumber());
+            pstmt.setString(10, getMajor());
+            pstmt.setDouble(11, getGpa());
+            pstmt.setDate(12, new java.sql.Date(getEnrollmentDate().getTime()));
+            pstmt.setString(13, getStatus());
+            pstmt.setBoolean(14, isInGoodStanding());
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows == 0) {
+                return false;
+            }
+
+            // Get the generated ID and set it
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    setId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Creating student failed, no ID obtained.");
+                }
+            }
+
+            return true;
+        }
+    }
+
+    // Delete student from system
+    public boolean deleteStudent(Connection connection) throws SQLException {
+        String sql = "DELETE FROM Students WHERE studentId = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, getStudentId());
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        }
+    }
+
+    //Retrieve Student Information by Id
+    // Retrieve Student Information by Id
+    // Retrieve Student Information by Id
+    public boolean retrieveStudent(Connection connection) throws SQLException {
+        String sql = "SELECT * FROM Students WHERE studentId = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, getStudentId());
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Retrieve student information from the result set and set the corresponding fields
+                    this.setFirstName(rs.getString("firstName"));
+                    this.setLastName(rs.getString("lastName"));
+                    this.setEmail(rs.getString("email"));
+                    this.setDateOfBirth(rs.getDate("dateOfBirth"));
+                    this.setGender(rs.getString("gender"));
+                    this.setNationality(rs.getString("nationality"));
+                    this.setAddress(rs.getString("address"));
+                    this.setPhoneNumber(rs.getString("phoneNumber"));
+                    this.setMajor(rs.getString("major"));
+                    this.setGpa(rs.getDouble("gpa"));
+                    this.setEnrollmentDate(rs.getDate("enrollmentDate"));
+                    this.setStatus(rs.getString("status"));
+                    this.setInGoodStanding(rs.getBoolean("inGoodStanding"));
+
+                    // You can similarly set other fields based on the retrieved data
+
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void printStudentInformation() {
+
+        System.out.println("***********************************************");
+        System.out.println("Student Information:");
+        System.out.println("+---------------------------------------------+");
+        String[] labels = {
+                "ID:", "First Name:", "Last Name:", "Email:", "Date of Birth:",
+                "Gender:", "Nationality:", "Address:", "Phone Number:",
+                "Major:", "GPA:", "Enrollment Date:", "Status:", "In Good Standing:"
+        };
+
+        String[] values = {
+                getStudentId(), getFirstName(), getLastName(), getEmail(), getDateOfBirth().toString(),
+                getGender(), getNationality(), getAddress(), getPhoneNumber(),
+                getMajor(), String.format("%.2f", getGpa()), getEnrollmentDate().toString(), getStatus(),
+                isInGoodStanding() ? "Yes" : "No"
+        };
+
+        for (int i = 0; i < labels.length; i++) {
+            System.out.printf("| %-16s %-31s |\n", labels[i], values[i]);
+        }
+        System.out.println("+---------------------------------------------+");
+    }
 
     //Getters and Setters
     public String getStudentId() {

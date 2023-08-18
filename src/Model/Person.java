@@ -2,13 +2,12 @@ package Model;
 
 public class Person {
 
-    private int id;
+    private Integer id;
     private String firstName;
     private String lastName;
     private String email;
 
-    public Person(int id, String firstName, String lastName, String email) {
-        this.id = id;
+    public Person(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -16,7 +15,7 @@ public class Person {
 
 
     //getters and setters
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 

@@ -18,11 +18,11 @@ public class Faculty extends Person{
     private String officeHours; // E.g., "Mon-Wed 10:00 - 12:00"
     private boolean isTenured;
 
-    public Faculty(int id, String firstName, String lastName, String email, String facultyId,
+    public Faculty(String firstName, String lastName, String email, String facultyId,
                    String department, String title, String highestDegree, Date hireDate,
                    double salary, List<String> researchInterests, String officeLocation,
                    String officeHours, boolean isTenured) {
-        super(id, firstName, lastName, email);
+        super(firstName, lastName, email);
         this.facultyId = facultyId;
         this.department = department;
         this.title = title;
